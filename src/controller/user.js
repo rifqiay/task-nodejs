@@ -4,6 +4,7 @@ const { create, findUsername } = require("../model/user");
 const commonHelper = require("../helper/common");
 const { generateToken, generateRefershToken } = require("../helper/jwt");
 const jwt = require("jsonwebtoken");
+const createError = require("http-errors");
 
 const userControler = {
   register: (req, res) => {
@@ -18,20 +19,17 @@ const userControler = {
       .then((result) => {
         commonHelper.response(res, result.rows, 200, "Register success");
       })
-      .catch((error) => res.send(error));
+      .catch((error) => next(new createError(error)));
   },
-  login: async (req, res) => {
+  login: async (req, res, next) => {
     try {
       const { username, password } = req.body;
       const {
         rows: [user],
       } = await findUsername(username);
-      if (!user)
-        throw commonHelper.response(res, null, 403, "Username is invalid");
+      if (!user) throw next(new createError(403, "username is invalid"));
       const isPassword = bcrypt.compareSync(password, user.password);
-      if (!isPassword)
-        throw commonHelper.response(res, null, 403, "Password is invalid");
-
+      if (!isPassword) throw next(new createError(403, "Password is invalid"));
       delete user.password;
       const payload = {
         id: user.id,
@@ -41,7 +39,7 @@ const userControler = {
 
       commonHelper.response(res, user, 200, "Login Success");
     } catch (error) {
-      console.log(error);
+      next(new createError[500]());
     }
   },
   refreshToken: (req, res) => {

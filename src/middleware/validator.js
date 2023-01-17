@@ -1,11 +1,11 @@
 const { validationResult } = require("express-validator");
-const commonHelper = require("../helper/common");
+const createError = require("http-errors");
 
 const validator = (req, res, next) => {
   const errors = validationResult(req).array();
   if (errors) {
     for (const error of errors) {
-      commonHelper.response(res, null, 422, error.msg, false);
+      next(new createError(422, error.msg));
     }
   }
   next();

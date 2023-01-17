@@ -1,9 +1,10 @@
 const { create, getAll, update, remove } = require("../model/product");
 const commonHelper = require("../helper/common");
 const { v4: uuidV4 } = require("uuid");
+const createError = require("http-errors");
 
 const productsControlers = {
-  save: (req, res) => {
+  save: (req, res, next) => {
     const { name, price, categoryid } = req.body;
     const data = {
       id: uuidV4(),
@@ -15,9 +16,9 @@ const productsControlers = {
       .then((result) => {
         commonHelper.response(res, null, 200, "Create Success", true);
       })
-      .catch((error) => res.send(error));
+      .catch((error) => next(new createError(error)));
   },
-  showAll: (req, res) => {
+  showAll: (req, res, next) => {
     getAll()
       .then((result) => {
         commonHelper.response(
@@ -28,9 +29,9 @@ const productsControlers = {
           true
         );
       })
-      .catch((error) => res.send(error));
+      .catch((error) => next(new createError(error)));
   },
-  Edit: (req, res) => {
+  Edit: (req, res, next) => {
     const { name, price, categoryid } = req.body;
     const id = req.params.id;
     const data = {
@@ -43,15 +44,15 @@ const productsControlers = {
       .then((result) => {
         commonHelper.response(res, null, 200, "Edit Success", true);
       })
-      .catch((error) => res.send(error));
+      .catch((error) => next(new createError(error)));
   },
-  erase: (req, res) => {
+  erase: (req, res, next) => {
     const id = req.params.id;
     remove(id)
       .then((result) => {
         commonHelper.response(res, null, 200, "Delete Success", true);
       })
-      .catch((error) => res.send(error));
+      .catch((error) => next(new createError(error)));
   },
 };
 

@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const createError = require("http-errors");
 
 const protect = (req, res, next) => {
   try {
@@ -8,17 +9,15 @@ const protect = (req, res, next) => {
       jwt.verify(token, process.env.SECRETE_KEY_JWT);
       next();
     } else {
-      res.json({
-        message: "server need token",
-      });
+      next(new createError(401, "Server need token"));
     }
   } catch (error) {
     if (error && error.name === "JsonWebTokenError") {
-      next(res.status(400).json({ message: "Token invalid" }));
+      next(new createError(401, "Token invalid"));
     } else if (error && error.name === "TokenExpiredError") {
-      next(res.status(400).json({ message: "Token expired" }));
+      next(new createError(401, "Token expired"));
     } else {
-      next(res.status(400).json({ message: "Token not active" }));
+      next(new createError(401, "Token not active"));
     }
   }
 };
